@@ -2,10 +2,10 @@
 from __future__ import print_function
 import requests, json, time, os, sys, select, psutil
 
-VERSION = 'sbtc v0.1.99'
+VERSION = 'sbtc v0.2.00'
 CREDITS = 'gijensen'
 
-DATADIR = os.environ['HOME']+'/.bitcoin'
+DATADIR = os.environ['HOME']+'/.devbitcoin'
 
 RPCUSER = ''
 RPCPASS = ''
@@ -169,21 +169,16 @@ def rpcgetrawtransaction(txid, verbose=False):
     else:
         print(result)
 
-# NOTE Perhaps don't rely on RPC for this?
-# FIXME This doesn't need to be it's own function
-def rpccreaterawtransaction(transactions, outputs):
-    transactions = json.loads(transactions)
-    outputs = json.loads(outputs)
-    
-    result = rpccommand('createrawtransaction', [transactions, outputs])
-
-    print(result)
-
-# TODO Complete this function
 def rpcsignrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype="ALL"): 
-    result = rpccommand('signrawtransaction', [hexstring, json.loads(prevtxes), json.loads(privatekeys), sighashtype])
+    result = rpccommand('signrawtransaction', [hexstring, json.loads(prevtxs), json.loads(privatekeys), sighashtype])
 
-    print(result)
+    keys = list(result.keys())
+    keys.sort()
+
+    for i in keys:
+        print ('%s: %s' % (i, result[i]))
+
+    return result
 
 def getExtHelp():
     print('Extended functions provided by sbtc:')
@@ -227,7 +222,7 @@ rpc_commands = {
     'getblockhash':[[1], lambda blkid:print(rpccommand('getblockhash', [int(blkid)]))],
     'getpeerinfo':[[0], rpcgetpeerinfo],
     'getrawtransaction':[[1, 2], rpcgetrawtransaction],
-    'createrawtransaction':[[2], rpccreaterawtransaction]
+    'createrawtransaction':[[2], lambda txs,outs:print(rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)]))]
 }
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
