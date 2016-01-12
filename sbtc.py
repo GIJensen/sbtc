@@ -210,14 +210,13 @@ sbtc_commands = {
 
 ext_commands = {
     'watchprogress':[[0], watchverificationprogress],
-    'getbcinfo':[[0, 1], lambda x=False:rpcgetblockchaininfo(toBool(x)),
-                 '[verbose=False] (runs getblockchaininfo)'],
     'rpcraw':[[-1], lambda x:print(rpccommand(x[0], x[1:]))]
 }
 
 rpc_commands = {
     'getinfo':[[0], rpcgetinfo],
-    'getblockchaininfo':[[0], rpcgetblockchaininfo],
+    'getblockchaininfo':[[0, 1], lambda x=False:rpcgetblockchaininfo(toBool(x)),
+                 '[verbose=False]'],
     'getblockcount':[[0], lambda:print(rpccommand('getblockcount'))],
     'getblockhash':[[1], lambda blkid:print(rpccommand('getblockhash', [int(blkid)]))],
     'getpeerinfo':[[0], rpcgetpeerinfo],
@@ -230,6 +229,14 @@ rpc_commands = {
 commands = sbtc_commands.copy()
 commands.update(ext_commands)
 commands.update(rpc_commands)
+
+aliases = {
+        'getbcinfo':'getblockchaininfo',
+        'getrawtx':'getrawtransaction',
+        'createrawtx':'createrawtransaction',
+        'count':'getblockcount',
+        'blockcount':'getblockcount'
+}
 
 # FIXME commands=commands may be confusing
 # FIXME Change "commands" to "COMMANDS" until deprecated?
@@ -245,6 +252,10 @@ def generateCmdHelp(commands=commands):
 
 def processCmd(cmd, commands=commands):
     cmd[0] = cmd[0].lower()
+
+    if cmd[0] in aliases:
+        cmd[0] = aliases[cmd[0]]
+
     if cmd[0] in commands:
         args = len(cmd)-1
         if args in commands[cmd[0]][0]: 
