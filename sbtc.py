@@ -314,6 +314,9 @@ def main():
         DATADIR = argv[2]
         argv = argv[3:]
         args -= 3
+    else:
+        argv = argv[1:]
+        args -= 1
 
     loadconfig(DATADIR)
     if args == 0:
