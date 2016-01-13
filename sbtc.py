@@ -5,7 +5,7 @@ import requests, json, time, os, sys, select, psutil
 VERSION = 'sbtc v0.2.00'
 CREDITS = 'gijensen'
 
-DATADIR = os.environ['HOME']+'/.devbitcoin'
+DATADIR = os.environ['HOME']+'/.bitcoin'
 
 RPCUSER = ''
 RPCPASS = ''
@@ -303,12 +303,23 @@ def prompt():
 
         cmd = input('> ')
 
+# TODO Support "-h" for help.
+# TODO Support "-v" for version.
 def main():
-    loadconfig()
-    if len(sys.argv) == 1:
+    global DATADIR
+    args = len(sys.argv)
+    argv = sys.argv
+
+    if args >= 3 and argv[1] == '-d':
+        DATADIR = argv[2]
+        argv = argv[3:]
+        args -= 3
+
+    loadconfig(DATADIR)
+    if args == 0:
         prompt()
     else:
-        processCmd(sys.argv[1:])
+        processCmd(argv)
 
 if __name__ == "__main__":
     main()
