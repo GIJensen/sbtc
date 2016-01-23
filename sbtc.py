@@ -1,59 +1,17 @@
 #!/usr/bin/python3
 from __future__ import print_function
 import requests, json, time, os, sys, select, psutil
-
-VERSION = 'sbtc v0.2.00'
-CREDITS = 'gijensen'
-
-DATADIR = os.environ['HOME']+'/.bitcoin'
-
-RPCUSER = ''
-RPCPASS = ''
-RPCPORT = 8332
-
-## If True will ignore the UID of bitcoind. ABSOLUTELY NOT RECOMMENDED.
-IGNORE_BITCOIND_UID = False
+import config
 
 ## For Python 2.x compatibility.
 try: range = xrange
 except NameError: pass
 
-# TODO Optionally output some positive feedback on success
-def loadconfig(datadir=DATADIR):
-    global RPCUSER, RPCPASS, RPCPORT
-    try:
-        f = open(datadir + '/bitcoin.conf', 'r')
-        lines = f.readlines()
-        f.close()
-    except Exception as e:
-        print('Error loading config: %s' % e)
-        return
-
-    tnSet = False
-
-    for i in lines:
-        line = i.strip().split('=', 1)
-        if line[0] == 'rpcuser':
-            RPCUSER = line[1]
-        elif line[0] == 'rpcpassword':
-            RPCPASS = line[1]
-        elif line[0] == 'rpcport':
-            RPCPORT = int(line[1])
-        elif line[0] == 'testnet' and RPCPORT in [8332, 18332]:
-            tnSet = True
-            if bool(line[1]):
-                RPCPORT = 18332
-            else:
-                RPCPORT = 8332
-
-    if not tnSet and RPCPORT == 18332:
-        RPCPORT = 8332
-
 # TODO Support testing against a different UID (other than self)
 # NOTE No idea if this works on OSs that aren't Linux
 def bitcoindIsSafe():
     for conn in psutil.net_connections('tcp4'):
-        if conn.laddr[1] == RPCPORT:
+        if conn.laddr[1] == config.RPCPORT:
             uids = psutil.Process(conn.pid).uids()
             return len(set([os.getuid(), uids.real, uids.effective, uids.saved])) == 1
 
@@ -62,11 +20,11 @@ class RPCError(Exception):
     pass
 
 def rpccommand(cmd, params=[]):
-    if not IGNORE_BITCOIND_UID and not bitcoindIsSafe():
+    if not config.IGNORE_BITCOIND_UID and not bitcoindIsSafe():
         print('!!WARNING!! bitcoind was started by a different UID.')
         return
 
-    url = "http://localhost:%d/" % RPCPORT
+    url = "http://localhost:%d/" % config.RPCPORT
     headers = {'content-type': 'application/json'}
 
     payload = {
@@ -76,7 +34,7 @@ def rpccommand(cmd, params=[]):
         "id": 0,
     }
 
-    response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(RPCUSER, RPCPASS))
+    response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(config.RPCUSER, config.RPCPASS))
     if response.status_code == 200:
         return response.json()['result']
     else:
@@ -206,7 +164,7 @@ def getRPCHelp():
             print(' %s (%s args)' % (i, rpc_commands[i][0]))
 
 sbtc_commands = {
-    'loadconfig':[[0, 1], loadconfig],
+    'loadconfig':[[0, 1], config.loadconfig],
     'exthelp':[[0], getExtHelp],
     'rpchelp':[[0], getRPCHelp]
 }
@@ -229,9 +187,9 @@ rpc_commands = {
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
 # FIXME Deprecate "commands"
-commands = sbtc_commands.copy()
-commands.update(ext_commands)
-commands.update(rpc_commands)
+config.commands = sbtc_commands.copy()
+config.commands.update(ext_commands)
+config.commands.update(rpc_commands)
 
 aliases = {
         'getbcinfo':'getblockchaininfo',
@@ -241,9 +199,7 @@ aliases = {
         'blockcount':'getblockcount'
 }
 
-# FIXME commands=commands may be confusing
-# FIXME Change "commands" to "COMMANDS" until deprecated?
-def generateCmdHelp(commands=commands):
+def generateCmdHelp(commands):
     cmdHelp = 'Commands: exit'
     for i in commands:
         if commands[i][0][0] == 0 and len(commands[i][0]) == 1:
@@ -253,8 +209,11 @@ def generateCmdHelp(commands=commands):
 
     return cmdHelp
 
-def processCmd(cmd, commands=commands):
+def processCmd(cmd, commands=None):
     cmd[0] = cmd[0].lower()
+
+    if not commands:
+        commands = config.commands
 
     if cmd[0] in aliases:
         cmd[0] = aliases[cmd[0]]
@@ -309,7 +268,7 @@ def prompt():
     try: input = raw_input
     except NameError: pass
     
-    print('%s by %s' % (VERSION, CREDITS))
+    print('%s by %s' % (config.VERSION, config.CREDITS))
 
     while cmd != 'exit':
         cmd = joinQuotes(cmd.split())
@@ -332,19 +291,18 @@ def prompt():
 # TODO Support "-h" for help.
 # TODO Support "-v" for version.
 def main():
-    global DATADIR
     args = len(sys.argv)
     argv = sys.argv
 
     if args >= 3 and argv[1] == '-d':
-        DATADIR = argv[2]
+        config.DATADIR = argv[2]
         argv = argv[3:]
         args -= 3
     else:
         argv = argv[1:]
         args -= 1
 
-    loadconfig(DATADIR)
+    config.loadconfig(config.DATADIR)
     if args == 0:
         prompt()
     else:
