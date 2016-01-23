@@ -14,6 +14,10 @@ RPCPORT = 8332
 ## If True will ignore the UID of bitcoind. ABSOLUTELY NOT RECOMMENDED.
 IGNORE_BITCOIND_UID = False
 
+## For Python 2.x compatibility.
+try: range = xrange
+except NameError: pass
+
 # TODO Optionally output some positive feedback on success
 def loadconfig(datadir=DATADIR):
     global RPCUSER, RPCPASS, RPCPORT
@@ -201,7 +205,6 @@ def getRPCHelp():
         else:
             print(' %s (%s args)' % (i, rpc_commands[i][0]))
 
-# TODO Test helptext field for commands
 sbtc_commands = {
     'loadconfig':[[0, 1], loadconfig],
     'exthelp':[[0], getExtHelp],
@@ -272,6 +275,31 @@ def processCmd(cmd, commands=commands):
 
     return False
 
+def joinQuotes(cmd):
+    i = 0
+    start = -1
+    delim = None
+    out = []
+
+    for i in range(len(cmd)):
+        if cmd[i][0] in ['\'', '"'] and start == -1:
+            delim = cmd[i][0]
+            cmd[i] = cmd[i][1:]
+            start = i
+        if cmd[i][-1] == delim:
+            cmd[i] = cmd[i][:-1]
+            out.append(' '.join(cmd[start:i+1]))
+            start = -1
+            delim = None
+        elif start == -1:
+            out.append(cmd[i])
+
+    if start == -1:
+        return out
+    else:
+        print('Warning: Failed to locate end of quote.')
+        return cmd
+
 def prompt():
     global input
     cmdHelp = generateCmdHelp(sbtc_commands)
@@ -284,9 +312,7 @@ def prompt():
     print('%s by %s' % (VERSION, CREDITS))
 
     while cmd != 'exit':
-        # TODO Handle quotes and apostrophes  enclosures as single arguments.
-        #      (ex: "hello world" should be 1 arg)
-        cmd = cmd.split()
+        cmd = joinQuotes(cmd.split())
 
         # FIXME Handle Exceptions properly (Catch TypeError at least)
         if len(cmd) > 0:
