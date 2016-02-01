@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 from __future__ import print_function
 import requests, json, time, os, sys, select, psutil
-import config
+from . import config
 
 ## For Python 2.x compatibility.
 try: range = xrange
@@ -33,7 +33,6 @@ def rpccommand(cmd, params=[]):
         "jsonrpc": "2.0",
         "id": 0,
     }
-
     response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(config.RPCUSER, config.RPCPASS))
     if response.status_code == 200:
         return response.json()['result']
@@ -191,14 +190,6 @@ config.commands = sbtc_commands.copy()
 config.commands.update(ext_commands)
 config.commands.update(rpc_commands)
 
-aliases = {
-        'getbcinfo':'getblockchaininfo',
-        'getrawtx':'getrawtransaction',
-        'createrawtx':'createrawtransaction',
-        'count':'getblockcount',
-        'blockcount':'getblockcount'
-}
-
 def generateCmdHelp(commands):
     cmdHelp = 'Commands: exit'
     for i in commands:
@@ -215,8 +206,8 @@ def processCmd(cmd, commands=None):
     if not commands:
         commands = config.commands
 
-    if cmd[0] in aliases:
-        cmd[0] = aliases[cmd[0]]
+    if cmd[0] in config.ALIASES:
+        cmd[0] = config.ALIASES[cmd[0]]
 
     if cmd[0] in commands:
         args = len(cmd)-1
@@ -287,26 +278,3 @@ def prompt():
             print(cmdHelp)
 
         cmd = input('> ')
-
-# TODO Support "-h" for help.
-# TODO Support "-v" for version.
-def main():
-    args = len(sys.argv)
-    argv = sys.argv
-
-    if args >= 3 and argv[1] == '-d':
-        config.DATADIR = argv[2]
-        argv = argv[3:]
-        args -= 3
-    else:
-        argv = argv[1:]
-        args -= 1
-
-    config.loadconfig(config.DATADIR)
-    if args == 0:
-        prompt()
-    else:
-        processCmd(argv)
-
-if __name__ == "__main__":
-    main()

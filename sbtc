@@ -1,0 +1,26 @@
+#!/usr/bin/python3
+from sbtclib.sbtc import *
+import sbtclib.config
+
+# TODO Support "-h" for help.
+# TODO Support "-v" for version.
+def main():
+    args = len(sys.argv)
+    argv = sys.argv
+
+    if args >= 3 and argv[1] == '-d':
+        config.DATADIR = argv[2]
+        argv = argv[3:]
+        args -= 3
+    else:
+        argv = argv[1:]
+        args -= 1
+
+    config.loadconfig(config.DATADIR)
+    if args == 0:
+        prompt()
+    else:
+        processCmd(argv)
+
+if __name__ == "__main__":
+    main()

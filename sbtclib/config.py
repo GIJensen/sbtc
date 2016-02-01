@@ -12,6 +12,14 @@ RPCPORT = 8332
 ## If True will ignore the UID of bitcoind. ABSOLUTELY NOT RECOMMENDED.
 IGNORE_BITCOIND_UID = False
 
+ALIASES = {
+        'getbcinfo':'getblockchaininfo',
+        'getrawtx':'getrawtransaction',
+        'createrawtx':'createrawtransaction',
+        'count':'getblockcount',
+        'blockcount':'getblockcount'
+}
+
 commands = {}
 
 # TODO Optionally output some positive feedback on success
@@ -25,7 +33,9 @@ def loadconfig(datadir=DATADIR):
         print('Error loading config: %s' % e)
         return
 
-    tnSet = False
+    portSet = False
+
+    RPCPORT = 8332
 
     for i in lines:
         line = i.strip().split('=', 1)
@@ -34,14 +44,7 @@ def loadconfig(datadir=DATADIR):
         elif line[0] == 'rpcpassword':
             RPCPASS = line[1]
         elif line[0] == 'rpcport':
+            portSet = True
             RPCPORT = int(line[1])
-        elif line[0] == 'testnet' and RPCPORT in [8332, 18332]:
-            tnSet = True
-            if bool(line[1]):
-                RPCPORT = 18332
-            else:
-                RPCPORT = 8332
-
-    if not tnSet and RPCPORT == 18332:
-        RPCPORT = 8332
-
+        elif line[0] == 'testnet' and not portSet and bool(line[1]):
+            RPCPORT = 18332
