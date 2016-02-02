@@ -3,13 +3,23 @@ from __future__ import print_function
 import requests, json, os, psutil
 from . import config
 
-# TODO Support testing against a different UID (other than self)
 # NOTE No idea if this works on OSs that aren't Linux
 def bitcoindIsSafe():
+    if config.RPCPORT in config.TRUSTED_UIDS:
+        expected_uid = config.TRUSTED_UIDS[config.RPCPORT]
+    else:
+        expected_uid = None
+
     for conn in psutil.net_connections('tcp4'):
         if conn.laddr[1] == config.RPCPORT:
             uids = psutil.Process(conn.pid).uids()
-            return len(set([os.getuid(), uids.real, uids.effective, uids.saved])) == 1
+            if len(set([uids.real, uids.effective, uids.saved])) == 1:
+                if not expected_uid:
+                    print('Trusting unknown port:uid, %d:%d...' % (config.RPCPORT, uids.real))
+                    config.TRUSTED_UIDS[config.RPCPORT] = uids.real
+                    open(config.DATADIR + '/sbtc.uids', 'a').write('%d:%d\n' % (config.RPCPORT, uids.real))
+                    expected_uid = uids.real
+                return uids.real == expected_uid
 
 ## Needed for catching RPC errors properly
 class RPCError(Exception):

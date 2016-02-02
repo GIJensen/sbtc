@@ -20,11 +20,13 @@ ALIASES = {
         'blockcount':'getblockcount'
 }
 
+TRUSTED_UIDS = {}
 commands = {}
 
 # TODO Optionally output some positive feedback on success
+# NOTE This function may not need a parameter
 def loadconfig(datadir=DATADIR):
-    global RPCUSER, RPCPASS, RPCPORT
+    global RPCUSER, RPCPASS, RPCPORT, TRUSTED_UIDS
     try:
         f = open(datadir + '/bitcoin.conf', 'r')
         lines = f.readlines()
@@ -48,3 +50,14 @@ def loadconfig(datadir=DATADIR):
             RPCPORT = int(line[1])
         elif line[0] == 'testnet' and not portSet and bool(line[1]):
             RPCPORT = 18332
+
+    try:
+        f = open(datadir + '/sbtc.uids', 'r')
+    except:
+        return
+    TRUSTED_UIDS = {}
+    uids = f.read().split('\n')
+    for i in uids[:-1]:
+        port, uid = i.split(':')
+        TRUSTED_UIDS[int(port)] = int(uid)
+    f.close()
