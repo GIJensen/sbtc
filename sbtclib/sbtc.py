@@ -165,7 +165,8 @@ def getRPCHelp():
 sbtc_commands = {
     'loadconfig':[[0, 1], config.loadconfig],
     'exthelp':[[0], getExtHelp],
-    'rpchelp':[[0], getRPCHelp]
+    'rpchelp':[[0], getRPCHelp],
+    'eval':[[1], lambda expr:print(eval(expr))]
 }
 
 ext_commands = {
