@@ -122,16 +122,17 @@ def rpcsignrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype
 
     return result
 
-# TODO Perhaps display all RPC commands + prepend a * beside unsupported
 def getRPCHelp():
-    print('RPC functions supported by sbtc:')
-    for i in rpc_commands:
-        if len(rpc_commands[i]) == 3:
-            print(' %s %s' % (i, rpc_commands[i][2]))
-        elif rpc_commands[i][0][0] == 0 and len(rpc_commands[i][0]) == 1:
-            print(' ' + i)
+    result = rpccommand('help', [])
+    for i in result.split('\n'):
+        if len(i) > 0 and i[0] != '=':
+            if i.split()[0] in rpc_commands:
+                print(i)
+            else:
+                print('*' + i)
         else:
-            print(' %s (%s args)' % (i, rpc_commands[i][0]))
+            print(i)
+    print('* = Unsupported')
 
 rpc_commands = {
     'getinfo':[[0], rpcgetinfo],
@@ -141,7 +142,8 @@ rpc_commands = {
     'getblockhash':[[1], lambda blkid:print(rpccommand('getblockhash', [int(blkid)]))],
     'getpeerinfo':[[0], rpcgetpeerinfo],
     'getrawtransaction':[[1, 2], rpcgetrawtransaction],
-    'createrawtransaction':[[2], lambda txs,outs:print(rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)]))]
+    'createrawtransaction':[[2], lambda txs,outs:print(rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)]))],
+    'help':[[0, 1], lambda func=None:print(rpccommand('help', [func])) if func else getRPCHelp()]
 }
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
