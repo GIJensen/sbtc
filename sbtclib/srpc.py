@@ -134,16 +134,26 @@ def getRPCHelp():
             print(i)
     print('* = Unsupported')
 
+def rpcprintcommand(cmd, params=[]):
+    result = rpccommand(cmd, params)
+    if type(result) == dict:
+        for i in result:
+            print('%s: %s' % (i, result[i]))
+    else:
+        print(result)
+
 rpc_commands = {
     'getinfo':[[0], rpcgetinfo],
     'getblockchaininfo':[[0, 1], lambda x=False:rpcgetblockchaininfo(toBool(x)),
                  '[verbose=False]'],
-    'getblockcount':[[0], lambda:print(rpccommand('getblockcount'))],
-    'getblockhash':[[1], lambda blkid:print(rpccommand('getblockhash', [int(blkid)]))],
+    'getblockcount':[[0], lambda:rpcprintcommand('getblockcount')],
+    'getbestblockhash':[[0], lambda:rpcprintcommand('getbestblockhash')],
+    'getblock':[[1, 2], lambda blkhash, verbose=True:rpcprintcommand('getblock', [blkhash, verbose])],
+    'getblockhash':[[1], lambda blkid:rpcprintcommand('getblockhash', [int(blkid)])],
     'getpeerinfo':[[0], rpcgetpeerinfo],
     'getrawtransaction':[[1, 2], rpcgetrawtransaction],
-    'createrawtransaction':[[2], lambda txs,outs:print(rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)]))],
-    'help':[[0, 1], lambda func=None:print(rpccommand('help', [func])) if func else getRPCHelp()]
+    'createrawtransaction':[[2], lambda txs,outs:rpcprintcommand('createrawtransaction', [json.loads(txs), json.loads(outs)])],
+    'help':[[0, 1], lambda func=None:rpcprintcommand('help', [func]) if func else getRPCHelp()]
 }
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
