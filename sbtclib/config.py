@@ -26,10 +26,8 @@ ALIASES = {
 TRUSTED_UIDS = {}
 commands = {}
 
-# TODO Optionally output some positive feedback on success
-# NOTE This function may not need a parameter
-def loadconfig(datadir=DATADIR):
-    global RPCUSER, RPCPASS, RPCPORT, TRUSTED_UIDS
+def loadconfig(datadir=DATADIR, display=False):
+    global RPCUSER, RPCPASS, RPCPORT, TRUSTED_UIDS, DATADIR
     try:
         f = open(datadir + '/bitcoin.conf', 'r')
         lines = f.readlines()
@@ -38,8 +36,11 @@ def loadconfig(datadir=DATADIR):
         print('Error loading config: %s' % e)
         return
 
-    portSet = False
+    if display:
+        print('Config loaded from: %s' % datadir + '/bitcoin.conf')
 
+    DATADIR = datadir
+    portSet = False
     RPCPORT = 8332
 
     for i in lines:
@@ -57,6 +58,8 @@ def loadconfig(datadir=DATADIR):
     try:
         f = open(datadir + '/sbtc.uids', 'r')
     except:
+        if display:
+            print('Failed to load config:uid list from: %s' % datadir + '/sbtc.uids')
         return
     TRUSTED_UIDS = {}
     uids = f.read().split('\n')
@@ -64,3 +67,6 @@ def loadconfig(datadir=DATADIR):
         port, uid = i.split(':')
         TRUSTED_UIDS[int(port)] = int(uid)
     f.close()
+
+    if display:
+        print('Trusted config:uid list loaded from: %s' % datadir + '/sbtc.uids')
