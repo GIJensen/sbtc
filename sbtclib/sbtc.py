@@ -27,7 +27,7 @@ def printverificationprogress(progress):
     sys.stdout.write('\r[%-50s] %5.2f%%' % ('x'*int(progress/2), progress))
     sys.stdout.flush()
 
-def watchverificationprogress():
+def watchverificationprogress(display=True):
     progress = 0
     while progress < 100 and not getInput():
         result = rpccommand('getblockchaininfo')
@@ -36,7 +36,7 @@ def watchverificationprogress():
         time.sleep(0.5)
     print()
 
-def getExtHelp():
+def getExtHelp(display=True):
     print('Extended functions provided by sbtc:')
     for i in ext_commands:
         if len (ext_commands[i]) == 3:
@@ -55,7 +55,7 @@ sbtc_commands = {
 
 ext_commands = {
     'watchprogress':[[0], watchverificationprogress],
-    'rpcraw':[[-1], lambda x:print(rpccommand(x[0], x[1:]))]
+    'rpcraw':[[-1], lambda x, display=True:displayResult(rpccommand(x[0], x[1:])) if display else rpccommand(x[0], x[1:])]
 }
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
