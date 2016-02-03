@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+#
+# Copyright (c) 2016, gijensen
+#
 from __future__ import print_function
 import time, sys, select
 from . import config
@@ -47,7 +50,7 @@ sbtc_commands = {
     'loadconfig':[[0, 1], config.loadconfig],
     'exthelp':[[0], getExtHelp],
     'rpchelp':[[0], getRPCHelp],
-    'eval':[[1], lambda expr:print(eval(expr))]
+    'eval':[[1, 2], lambda expr, display=True:print(eval(expr)) if display else eval(expr)]
 }
 
 ext_commands = {
@@ -83,9 +86,9 @@ def processCmd(cmd, commands=None):
         args = len(cmd)-1
         if args in commands[cmd[0]][0]: 
             if args == 0:
-                commands[cmd[0]][1]()
+                commands[cmd[0]][1](display=True)
             else:
-                commands[cmd[0]][1](*cmd[1:])
+                commands[cmd[0]][1](*cmd[1:], display=True)
             return True
         elif commands[cmd[0]][0][0] == -1:
             commands[cmd[0]][1](cmd[1:])

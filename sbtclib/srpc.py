@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+#
+# Copyright (c) 2016, gijensen
+#
 from __future__ import print_function
 import requests, json, os, psutil
 from . import config
@@ -63,65 +66,153 @@ def toBool(v):
     else:
         raise TypeError('%s cannot be converted to bool' % v)
 
-def rpcgetinfo():
-    result = rpccommand('getinfo')
-    keys = list(result.keys())
+def displayDict(data, exclude=[], depth=0):
+    keys = list(data.keys())
     keys.sort()
     for i in keys:
-        if i in ['relayfee', 'balance', 'paytxfee']:
-            print('%s: %0.8f' % (i, result[i]))
+        if i in exclude: continue
+        data_type = type(data[i])
+        spacing = '    '*depth
+        if data_type == dict:
+            print('%s%s: {' % (spacing, i))
+            displayDict(data[i], exclude, depth+1)
+            print('%s}' % spacing)
+        elif data_type == list:
+            print('%s%s: [' % (spacing, i))
+            displayList(data[i], exclude, depth+1)
+            print('%s]' % spacing)
+        elif i in ['relayfee', 'balance', 'paytxfee', 'fee', 'modifiedfee']:
+            print('%s%s: %0.8f' % (spacing, i, data[i]))
         else:
-            print('%s: %s' % (i, repr(result[i])))
+            print('%s%s: %s' % (spacing, i, repr(data[i])))
 
-def rpcgetpeerinfo():
-    for i in rpccommand('getpeerinfo'):
-        keys = list(i.keys())
-        keys.sort()
-        for ii in keys:
-            print('%s: %s' % (ii, repr(i[ii])))
-        print('====================')
-
-def rpcgetblockchaininfo(verbose=True):
-    result = rpccommand('getblockchaininfo')
-    keys = list(result.keys())
-    keys.sort()
-    for i in keys:
-        if i == 'softforks':
-            if verbose:
-                print('softforks:')
-                print('====================')
-                for ii in result[i]:
-                    for iii in ii:
-                        print('\t%s: %s' % (iii, repr(ii[iii])))
-                    print('====================')
+def displayList(data, exclude=[], depth=0):
+    for i in data:
+        data_type = type(i)
+        spacing = '    '*depth
+        if data_type == dict:
+            print('%s{' % spacing)
+            displayDict(i, exclude, depth+1)
+            print('%s}' % spacing)
+        elif data_type == list:
+            print('%s[' % spacing)
+            displayList(i, exclude, depth+1)
+            print('%s]' % spacing)
         else:
-            print('%s: %s' % (i, repr(result[i])))
+            print('%s%s' % (spacing, repr(i)))
 
-# NOTE This function was rushed for tests
-# FIXME Finish function
-def rpcgetrawtransaction(txid, verbose=False):
-    result = rpccommand('getrawtransaction', [txid, int(toBool(verbose))])
-
-    if verbose:
-        keys = list(result.keys())
-        keys.sort()
-
-        for i in keys:
-            print ('%s: %s' % (i, result[i]))
+def displayResult(result, exclude=[]):
+    result_type = type(result)
+    if result_type == dict:
+        displayDict(result, exclude)
+    elif result_type == list:
+        displayList(result, exclude)
     else:
-        print(result)
+        print(repr(result))
 
-def rpcsignrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype="ALL"): 
+def getinfo(display=False):
+    result = rpccommand('getinfo')
+    if display: displayResult(result)
+    return result
+
+def getpeerinfo(display=False):
+    result = rpccommand('getpeerinfo')
+    if display: displayResult(result)
+    return result
+
+def getblockchaininfo(verbose=True, display=False):
+    result = rpccommand('getblockchaininfo')
+    if display:
+        if verbose:
+            displayResult(result)
+        else:
+            displayResult(result, ['softforks'])
+    return result
+
+def getrawtransaction(txid, verbose=False, display=False):
+    result = rpccommand('getrawtransaction', [txid, int(toBool(verbose))])
+    if display: displayResult(result)
+    return result
+
+def signrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype="ALL", display=False):
     result = rpccommand('signrawtransaction', [hexstring, json.loads(prevtxs), json.loads(privatekeys), sighashtype])
+    if display: displayResult(result)
+    return result
 
-    keys = list(result.keys())
-    keys.sort()
+def getblockcount(display=False):
+    result = rpccommand('getblockcount')
+    if display: print(result)
+    return result
 
-    for i in keys:
-        print ('%s: %s' % (i, result[i]))
+def getbestblockhash(display=False):
+    result = rpccommand('getbestblockhash')
+    if display: print(result)
+    return result
+
+def getblock(blkhash, verbose=True, display=False):
+    result = rpccommand('getblock', [blkhash, toBool(verbose)])
+    if display: displayResult(result)
+    return result
+
+def getblockheader(blkhash, verbose=True, display=False):
+    result = rpccommand('getblockheader', [blkhash, toBool(verbose)])
+    if display: displayResult(result)
+    return result
+
+def getdifficulty(display=False):
+    result = rpccommand('getdifficulty')
+    if display: print(result)
+    return result
+
+def getmempoolinfo(display=False):
+    result = rpccommand('getmempoolinfo')
+    if display: displayResult(result)
+    return result
+
+def getrawmempool(verbose=False, display=False):
+    result = rpccommand('getrawmempool', [toBool(verbose)])
+    if display: displayResult(result)
+    return result
+
+def gettxout(txid, n, inclmempl=True, display=False):
+    result = rpccommand('gettxout', [txid, int(n), toBool(inclmempl)])
+    if display: displayResult(result)
+    return result
+
+def ping(display=False):
+    return rpccommand('ping')
+
+def gettxoutproof(txids, blkhash=None, display=False):
+    result = rpccommand('gettxoutproof', [json.loads(txids), blkhash]) if blkhash else rpccommand('gettxoutproof', [json.loads(txids)])
+    if display: displayResult(result)
+    return result
+
+def getchaintips(display=False):
+    result = rpccommand('getchaintips')
+    if display: displayResult(result)
+    return result
+
+def getblockhash(blkid, display=False):
+    result = rpccommand('getblockhash', [int(blkid)])
+    if display: displayResult(result)
+    return result
+
+def createrawtransaction(txs, outs, display=False):
+    result = rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)])
+    if display: displayResult(result)
+    return result
+
+def rpchelp(func=None, display=False):
+    if func:
+        result = rpccommand('help', [func])
+        if display: displayResult(result)
+    else:
+        result = rpccommand('help')
+        if display: getRPCHelp()
 
     return result
 
+# TODO Find a clean way to integrate extended help
 def getRPCHelp():
     result = rpccommand('help', [])
     for i in result.split('\n'):
@@ -134,26 +225,26 @@ def getRPCHelp():
             print(i)
     print('* = Unsupported')
 
-def rpcprintcommand(cmd, params=[]):
-    result = rpccommand(cmd, params)
-    if type(result) == dict:
-        for i in result:
-            print('%s: %s' % (i, result[i]))
-    else:
-        print(result)
-
 rpc_commands = {
-    'getinfo':[[0], rpcgetinfo],
-    'getblockchaininfo':[[0, 1], lambda x=False:rpcgetblockchaininfo(toBool(x)),
+    'getinfo':[[0], getinfo],
+    'getblockchaininfo':[[0, 1], lambda x=False, display=False:getblockchaininfo(toBool(x), display),
                  '[verbose=False]'],
-    'getblockcount':[[0], lambda:rpcprintcommand('getblockcount')],
-    'getbestblockhash':[[0], lambda:rpcprintcommand('getbestblockhash')],
-    'getblock':[[1, 2], lambda blkhash, verbose=True:rpcprintcommand('getblock', [blkhash, verbose])],
-    'getblockhash':[[1], lambda blkid:rpcprintcommand('getblockhash', [int(blkid)])],
-    'getpeerinfo':[[0], rpcgetpeerinfo],
-    'getrawtransaction':[[1, 2], rpcgetrawtransaction],
-    'createrawtransaction':[[2], lambda txs,outs:rpcprintcommand('createrawtransaction', [json.loads(txs), json.loads(outs)])],
-    'help':[[0, 1], lambda func=None:rpcprintcommand('help', [func]) if func else getRPCHelp()]
+    'getblockcount':[[0], getblockcount],
+    'getbestblockhash':[[0], getbestblockhash],
+    'getblock':[[1, 2], getblock],
+    'getblockheader':[[1, 2], getblockheader],
+    'getdifficulty':[[0], getdifficulty],
+    'getmempoolinfo':[[0], getmempoolinfo],
+    'getrawmempool':[[0, 1], getrawmempool],
+    'gettxout':[[2, 3], gettxout],
+    'ping':[[0], ping],
+    'gettxoutproof':[[1, 2], gettxoutproof],
+    'getchaintips':[[0], getchaintips],
+    'getblockhash':[[1], getblockhash],
+    'getpeerinfo':[[0], getpeerinfo],
+    'getrawtransaction':[[1, 2], getrawtransaction],
+    'createrawtransaction':[[2], createrawtransaction],
+    'help':[[0, 1], rpchelp]
 }
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]

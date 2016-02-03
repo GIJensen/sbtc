@@ -1,3 +1,6 @@
+#
+# Copyright (c) 2016, gijensen
+#
 import os
 
 VERSION = 'sbtc v0.2.00'
