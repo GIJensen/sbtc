@@ -7,6 +7,10 @@ import time, sys, select
 from . import config
 from .srpc import *
 
+# TODO gettxfeepaid function
+# TODO prompt command history, arrow key support
+# TODO Plugin support, .so, and .py files
+
 ## For Python 2.x compatibility.
 try: range = xrange
 except NameError: pass
@@ -50,16 +54,16 @@ sbtc_commands = {
     'loadconfig':[[0, 1], config.loadconfig],
     'exthelp':[[0], getExtHelp],
     'rpchelp':[[0], getRPCHelp],
-    'eval':[[1, 2], lambda expr, display=True:print(eval(expr)) if display else eval(expr)]
+    'eval':[[1], lambda expr, display=True:displayResult(eval(expr)) if display else eval(expr)],
+    'exec':[[1], lambda expr, display=False:exec(expr)]
 }
 
 ext_commands = {
     'watchprogress':[[0], watchverificationprogress],
-    'rpcraw':[[-1], lambda x, display=True:displayResult(rpccommand(x[0], x[1:])) if display else rpccommand(x[0], x[1:])]
+    'rpcraw':[[-1], lambda x, display=False:rpccommand(x[0], x[1:], display)]
 }
 
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
-# FIXME Deprecate "commands"
 config.commands.update(sbtc_commands)
 config.commands.update(ext_commands)
 
@@ -91,7 +95,7 @@ def processCmd(cmd, commands=None):
                 commands[cmd[0]][1](*cmd[1:], display=True)
             return True
         elif commands[cmd[0]][0][0] == -1:
-            commands[cmd[0]][1](cmd[1:])
+            commands[cmd[0]][1](cmd[1:], display=True)
             return True
         else:
             print('Error: Expected %s args, recieved %d.' % (commands[cmd[0]][0], args))

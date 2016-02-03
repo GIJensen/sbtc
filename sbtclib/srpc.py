@@ -28,7 +28,7 @@ def bitcoindIsSafe():
 class RPCError(Exception):
     pass
 
-def rpccommand(cmd, params=[]):
+def rpccommand(cmd, params=[], display=False):
     if not config.IGNORE_BITCOIND_UID and not bitcoindIsSafe():
         print('!!WARNING!! bitcoind was started by a different UID.')
         return
@@ -44,7 +44,9 @@ def rpccommand(cmd, params=[]):
     }
     response = requests.post(url, data=json.dumps(payload), headers=headers, auth=(config.RPCUSER, config.RPCPASS))
     if response.status_code == 200:
-        return response.json()['result']
+        result = response.json()['result']
+        if display: displayResult(result)
+        return result
     else:
         try:
             response_json = response.json()
@@ -202,10 +204,127 @@ def createrawtransaction(txs, outs, display=False):
     if display: displayResult(result)
     return result
 
+def gettxoutsetinfo(display=False):
+    result = rpccommand('gettxoutsetinfo')
+    if display: displayResult(result)
+    return result
+
+def verifychain(chklvl=3, numblks=388, display=False):
+    result = rpccommand('verifychain', int(chklvl), int(numblks))
+    if display: displayResult(result)
+    return result
+
+def verifytxoutproof(proof, display=False):
+    result = rpccommand('verifytxoutproof', [proof])
+    if display: displayResult(result)
+    return result
+
+def stop(display=False):
+    result = rpccommand('stop')
+    if display: displayResult(result)
+    return result
+
+def generate(numblks, display=False):
+    result = rpccommand('generate', [int(numblks)])
+    if display: displayResult(result)
+    return result
+
+def getgenerate(display=False):
+    result = rpccommand('getgenerate')
+    if display: displayResult(result)
+    return result
+
+def setgenerate(gen, genproclimit=None):
+    if genproclimit:
+        result = rpccommand('setgenerate', [int(genproclimit)])
+    else:
+        result = rpccommand('setgenerate')
+    if display: displayResult(result)
+    return result
+
+def getblocktemplate(jsonReqObj=None, display=False):
+    if jsonReqObj:
+        result = rpccommand('getblocktemplate', [json.loads(jsonReqObj)])
+    else:
+        result = rpccommand('getblocktemplate')
+    if display: displayResult(result)
+    return result
+
+def getmininginfo(display=False):
+    result = rpccommand('getmininginfo')
+    if display: displayResult(result)
+    return result
+
+def getnetworkhashps(blocks=120, height=-1, display=False):
+    result = rpccommand('getnetworkhashps', [int(blocks), int(height)])
+    if display: displayResult(result)
+    return result
+
+def prioritisetransaction(txid, priority_d, fee_d, display=False):
+    result = rpccommand('prioritisetransaction', [txid, int(priority_d), int(fee_d)])
+    if display: displayResult(result)
+    return result
+
+def submitblock(data, jsonParamsObj=None, display=False):
+    if jsonParamsObj:
+        result = rpccommand('submitblock', [data, json.loads(jsonParamsObj)])
+    else:
+        result = rpccommand('submitblock', [data])
+    if display: displayResult(result)
+    return result
+    
+def addnode(node, cmd, display=False):
+    result = rpccommand('addnode', [node, cmd])
+    if display: displayResult(result)
+    return result
+
+def clearbanned(display=False):
+    result = rpccommand('clearbanned')
+    if display: displayResult(result)
+    return result
+
+def disconnectnode(node, display=False):
+    result = rpccommand('disconnectnode', [node])
+    if display: displayResult(result)
+    return result
+
+def getaddednodeinfo(dns, node=None, display=False):
+    if node:
+        result = rpccommand('getaddednodeinfo', [toBool(dns), node])
+    else:
+        result = rpccommand('getaddednodeinfo', [toBool(dns)])
+    if display: displayResult(result)
+    return result
+
+def getconnectioncount(display=False):
+    result = rpccommand('getconnectioncount')
+    if display: displayResult(result)
+    return result
+
+def getnettotals(display=False):
+    result = rpccommand('getnettotals')
+    if display: displayResult(result)
+    return result
+
+def getnetworkinfo(display=False):
+    result = rpccommand('getnetworkinfo')
+    if display: displayResult(result)
+    return result
+
+def listbanned(display=False):
+    result = rpccommand('listbanned')
+    if display: displayResult(result)
+    return result
+
+def setban(ip, cmd, bantime=0, absolute=False, display=False):
+    result = rpccommand('setban', [ip, cmd, int(bantime), toBool(absolute)])
+    if display: displayResult(result)
+    return result
+
 def rpchelp(func=None, display=False):
     if func:
         result = rpccommand('help', [func])
-        if display: displayResult(result)
+        if display: print(result)
     else:
         result = rpccommand('help')
         if display: getRPCHelp()
@@ -244,6 +363,27 @@ rpc_commands = {
     'getpeerinfo':[[0], getpeerinfo],
     'getrawtransaction':[[1, 2], getrawtransaction],
     'createrawtransaction':[[2], createrawtransaction],
+    'gettxoutsetinfo':[[0], gettxoutsetinfo],
+    'verifychain':[[0, 1, 2], verifychain],
+    'verifytxoutproof':[[1], verifytxoutproof],
+    'stop':[[0], stop],
+    'generate':[[1], generate],
+    'getgenerate':[[0], getgenerate],
+    'setgenerate':[[1, 2], setgenerate],
+    'getblocktemplate':[[0, 1], getblocktemplate],
+    'getmininginfo':[[0], getmininginfo],
+    'getnetworkhashps':[[0, 1, 2], getnetworkhashps],
+    'prioritisetransaction':[[3], prioritisetransaction],
+    'submitblock':[[1, 2], submitblock],
+    'addnode':[[2], addnode],
+    'clearbanned':[[0], clearbanned],
+    'disconnectnode':[[1], disconnectnode],
+    'getaddednodeinfo':[[1, 2], getaddednodeinfo],
+    'getconnectioncount':[[0], getconnectioncount],
+    'getnettotals':[[0], getnettotals],
+    'getnetworkinfo':[[0], getnetworkinfo],
+    'listbanned':[[0], listbanned],
+    'setban':[[2, 3, 4], setban],
     'help':[[0, 1], rpchelp]
 }
 
