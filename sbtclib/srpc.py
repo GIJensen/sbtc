@@ -213,7 +213,7 @@ def rpchelp(func=None, display=False):
     return result
 
 # TODO Find a clean way to integrate extended help
-def getRPCHelp():
+def getRPCHelp(display=True):
     result = rpccommand('help', [])
     for i in result.split('\n'):
         if len(i) > 0 and i[0] != '=':
