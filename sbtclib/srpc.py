@@ -109,18 +109,16 @@ def displayResult(result, exclude=[]):
         displayDict(result, exclude)
     elif result_type == list:
         displayList(result, exclude)
+    elif result_type == str and '\n' in result:
+        print(result)
     else:
         print(repr(result))
 
 def getinfo(display=False):
-    result = rpccommand('getinfo')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getinfo', [], display)
 
 def getpeerinfo(display=False):
-    result = rpccommand('getpeerinfo')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getpeerinfo', [], display)
 
 def getblockchaininfo(verbose=True, display=False):
     result = rpccommand('getblockchaininfo')
@@ -132,199 +130,134 @@ def getblockchaininfo(verbose=True, display=False):
     return result
 
 def getrawtransaction(txid, verbose=False, display=False):
-    result = rpccommand('getrawtransaction', [txid, int(toBool(verbose))])
-    if display: displayResult(result)
-    return result
+    return rpccommand('getrawtransaction', [txid, int(toBool(verbose))], display)
 
 def signrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype="ALL", display=False):
-    result = rpccommand('signrawtransaction', [hexstring, json.loads(prevtxs), json.loads(privatekeys), sighashtype])
-    if display: displayResult(result)
-    return result
+    return rpccommand('signrawtransaction', [hexstring, json.loads(prevtxs), json.loads(privatekeys), sighashtype], display)
 
 def getblockcount(display=False):
-    result = rpccommand('getblockcount')
+    return rpccommand('getblockcount', [], display)
     if display: print(result)
     return result
 
 def getbestblockhash(display=False):
-    result = rpccommand('getbestblockhash')
+    return rpccommand('getbestblockhash', [], display)
     if display: print(result)
     return result
 
 def getblock(blkhash, verbose=True, display=False):
-    result = rpccommand('getblock', [blkhash, toBool(verbose)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('getblock', [blkhash, toBool(verbose)], display)
 
 def getblockheader(blkhash, verbose=True, display=False):
-    result = rpccommand('getblockheader', [blkhash, toBool(verbose)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('getblockheader', [blkhash, toBool(verbose)], display)
 
 def getdifficulty(display=False):
-    result = rpccommand('getdifficulty')
+    return rpccommand('getdifficulty', [], display)
     if display: print(result)
     return result
 
 def getmempoolinfo(display=False):
-    result = rpccommand('getmempoolinfo')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getmempoolinfo', [], display)
 
 def getrawmempool(verbose=False, display=False):
-    result = rpccommand('getrawmempool', [toBool(verbose)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('getrawmempool', [toBool(verbose)], display)
 
 def gettxout(txid, n, inclmempl=True, display=False):
-    result = rpccommand('gettxout', [txid, int(n), toBool(inclmempl)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('gettxout', [txid, int(n), toBool(inclmempl)], display)
 
 def ping(display=False):
     return rpccommand('ping')
 
 def gettxoutproof(txids, blkhash=None, display=False):
-    result = rpccommand('gettxoutproof', [json.loads(txids), blkhash]) if blkhash else rpccommand('gettxoutproof', [json.loads(txids)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('gettxoutproof', [json.loads(txids), blkhash]) if blkhash else rpccommand('gettxoutproof', [json.loads(txids)], display)
 
 def getchaintips(display=False):
-    result = rpccommand('getchaintips')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getchaintips', [], display)
 
 def getblockhash(blkid, display=False):
-    result = rpccommand('getblockhash', [int(blkid)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('getblockhash', [int(blkid)], display)
 
 def createrawtransaction(txs, outs, display=False):
-    result = rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('createrawtransaction', [json.loads(txs), json.loads(outs)], display)
 
 def gettxoutsetinfo(display=False):
-    result = rpccommand('gettxoutsetinfo')
-    if display: displayResult(result)
-    return result
+    return rpccommand('gettxoutsetinfo', [], display)
 
 def verifychain(chklvl=3, numblks=388, display=False):
-    result = rpccommand('verifychain', int(chklvl), int(numblks))
-    if display: displayResult(result)
-    return result
+    return rpccommand('verifychain', [int(chklvl), int(numblks)], display)
 
 def verifytxoutproof(proof, display=False):
-    result = rpccommand('verifytxoutproof', [proof])
-    if display: displayResult(result)
-    return result
+    return rpccommand('verifytxoutproof', [proof], display)
 
 def stop(display=False):
-    result = rpccommand('stop')
-    if display: displayResult(result)
-    return result
+    return rpccommand('stop', [], display)
 
 def generate(numblks, display=False):
-    result = rpccommand('generate', [int(numblks)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('generate', [int(numblks)], display)
 
 def getgenerate(display=False):
-    result = rpccommand('getgenerate')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getgenerate', [], display)
 
 def setgenerate(gen, genproclimit=None):
     if genproclimit:
-        result = rpccommand('setgenerate', [int(genproclimit)])
+        return rpccommand('setgenerate', [toBool(gen), int(genproclimit)], display)
     else:
-        result = rpccommand('setgenerate')
-    if display: displayResult(result)
-    return result
+        return rpccommand('setgenerate', [toBool(gen)], display)
 
 def getblocktemplate(jsonReqObj=None, display=False):
     if jsonReqObj:
-        result = rpccommand('getblocktemplate', [json.loads(jsonReqObj)])
+        return rpccommand('getblocktemplate', [json.loads(jsonReqObj)], display)
     else:
-        result = rpccommand('getblocktemplate')
-    if display: displayResult(result)
-    return result
+        return rpccommand('getblocktemplate', [], display)
 
 def getmininginfo(display=False):
-    result = rpccommand('getmininginfo')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getmininginfo', [], display)
 
 def getnetworkhashps(blocks=120, height=-1, display=False):
-    result = rpccommand('getnetworkhashps', [int(blocks), int(height)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('getnetworkhashps', [int(blocks), int(height)], display)
 
 def prioritisetransaction(txid, priority_d, fee_d, display=False):
-    result = rpccommand('prioritisetransaction', [txid, int(priority_d), int(fee_d)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('prioritisetransaction', [txid, int(priority_d), int(fee_d)], display)
 
 def submitblock(data, jsonParamsObj=None, display=False):
     if jsonParamsObj:
-        result = rpccommand('submitblock', [data, json.loads(jsonParamsObj)])
+        return rpccommand('submitblock', [data, json.loads(jsonParamsObj)], display)
     else:
-        result = rpccommand('submitblock', [data])
-    if display: displayResult(result)
-    return result
+        return rpccommand('submitblock', [data], display)
     
 def addnode(node, cmd, display=False):
-    result = rpccommand('addnode', [node, cmd])
-    if display: displayResult(result)
-    return result
+    return rpccommand('addnode', [node, cmd], display)
 
 def clearbanned(display=False):
-    result = rpccommand('clearbanned')
-    if display: displayResult(result)
-    return result
+    return rpccommand('clearbanned', [], display)
 
 def disconnectnode(node, display=False):
-    result = rpccommand('disconnectnode', [node])
-    if display: displayResult(result)
-    return result
+    return rpccommand('disconnectnode', [node], display)
 
 def getaddednodeinfo(dns, node=None, display=False):
     if node:
-        result = rpccommand('getaddednodeinfo', [toBool(dns), node])
+        return rpccommand('getaddednodeinfo', [toBool(dns), node], display)
     else:
-        result = rpccommand('getaddednodeinfo', [toBool(dns)])
-    if display: displayResult(result)
-    return result
+        return rpccommand('getaddednodeinfo', [toBool(dns)], display)
 
 def getconnectioncount(display=False):
-    result = rpccommand('getconnectioncount')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getconnectioncount', [], display)
 
 def getnettotals(display=False):
-    result = rpccommand('getnettotals')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getnettotals', [], display)
 
 def getnetworkinfo(display=False):
-    result = rpccommand('getnetworkinfo')
-    if display: displayResult(result)
-    return result
+    return rpccommand('getnetworkinfo', [], display)
 
 def listbanned(display=False):
-    result = rpccommand('listbanned')
-    if display: displayResult(result)
-    return result
+    return rpccommand('listbanned', [], display)
 
 def setban(ip, cmd, bantime=0, absolute=False, display=False):
-    result = rpccommand('setban', [ip, cmd, int(bantime), toBool(absolute)])
-    if display: displayResult(result)
-    return result
+    return rpccommand('setban', [ip, cmd, int(bantime), toBool(absolute)], display)
 
 def rpchelp(func=None, display=False):
     if func:
-        result = rpccommand('help', [func])
-        if display: print(result)
+        result = rpccommand('help', [func], display)
     else:
         result = rpccommand('help')
         if display: getRPCHelp()
@@ -333,7 +266,7 @@ def rpchelp(func=None, display=False):
 
 # TODO Find a clean way to integrate extended help
 def getRPCHelp(display=True):
-    result = rpccommand('help', [])
+    result = rpccommand('help')
     for i in result.split('\n'):
         if len(i) > 0 and i[0] != '=':
             if i.split()[0] in rpc_commands:
