@@ -83,7 +83,7 @@ def displayDict(data, exclude=[], depth=0):
             print('%s%s: [' % (spacing, i))
             displayList(data[i], exclude, depth+1)
             print('%s]' % spacing)
-        elif i in ['relayfee', 'balance', 'paytxfee', 'fee', 'modifiedfee']:
+        elif i in ['relayfee', 'balance', 'paytxfee', 'fee', 'modifiedfee', 'immature_balance', 'unconfirmed_balance']:
             print('%s%s: %0.8f' % (spacing, i, data[i]))
         else:
             print('%s%s: %s' % (spacing, i, repr(data[i])))
@@ -132,18 +132,14 @@ def getblockchaininfo(verbose=True, display=False):
 def getrawtransaction(txid, verbose=False, display=False):
     return rpccommand('getrawtransaction', [txid, int(toBool(verbose))], display)
 
-def signrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype="ALL", display=False):
+def signrawtransaction(hexstring, prevtxs=None, privatekeys=None, sighashtype='ALL', display=False):
     return rpccommand('signrawtransaction', [hexstring, json.loads(prevtxs), json.loads(privatekeys), sighashtype], display)
 
 def getblockcount(display=False):
     return rpccommand('getblockcount', [], display)
-    if display: print(result)
-    return result
 
 def getbestblockhash(display=False):
     return rpccommand('getbestblockhash', [], display)
-    if display: print(result)
-    return result
 
 def getblock(blkhash, verbose=True, display=False):
     return rpccommand('getblock', [blkhash, toBool(verbose)], display)
@@ -153,8 +149,6 @@ def getblockheader(blkhash, verbose=True, display=False):
 
 def getdifficulty(display=False):
     return rpccommand('getdifficulty', [], display)
-    if display: print(result)
-    return result
 
 def getmempoolinfo(display=False):
     return rpccommand('getmempoolinfo', [], display)
@@ -255,6 +249,162 @@ def listbanned(display=False):
 def setban(ip, cmd, bantime=0, absolute=False, display=False):
     return rpccommand('setban', [ip, cmd, int(bantime), toBool(absolute)], display)
 
+def decoderawtransaction(hexstr, display=False):
+    return rpccommand('decoderawtransaction', [hexstr], display)
+
+def decodescript(hexraw, display=False):
+    return rpccommand('decodescript', [hexraw], display)
+
+def fundrawtransaction(hexstr, inclwatch, display=False):
+    return rpccommand('fundrawtransaction', [hexstr, toBool(inclwatch)], display)
+
+def sendrawtransaction(hexstr, allowhighfees=False, display=False):
+    return rpccommand('sendrawtransaction', [hexstr, toBool(allowhighfees)], display)
+
+def createmultisig(nreq, keys, display=False):
+    return rpccommand('createmultisig', [int(nreq), json.loads(keys)], display)
+
+def estimatefee(nblks, display=False):
+    return rpccommand('estimatefee', [int(nblks)], display)
+
+def estimatepriority(nblks, display=False):
+    return rpccommand('estimatepriority', [int(nblks)], display)
+
+def estimatesmartfee(nblks, display=False):
+    return rpccommand('estimatesmartfee', [int(nblks)], display)
+
+def estimatesmartpriority(nblks, display=False):
+    return rpccommand('estimatesmartpriority', [int(nblks)], display)
+
+def validateaddress(addr, display=False):
+    return rpccommand('validateaddress', [addr], display)
+
+def abandontransaction(txid, display=False):
+    return rpccommand('abandontransaction', [txid], display)
+
+def addmultisigaddress(nreq, keys, account='', display=False):
+    return rpccommand('abdmultisigaddress', [int(nreq), json.loads(keys), account], display)
+
+def backupwallet(dest, display=False):
+    return rpccommand('backupwallet', [dest], display)
+
+def encryptwallet(passphr, display=False):
+    return rpccommand('encryptwallet', [passphr], display)
+
+def dumpprivkey(addr, display=False):
+    return rpccommand('dumpprivkey', [addr], display)
+
+def dumpwallet(filen, display=False):
+    return rpccommand('dumpwallet', [filen], display)
+
+def getaccount(addr, display=False):
+    return rpccommand('getaccount', [addr], display)
+
+def getaccountaddress(acc, display=False):
+    return rpccommand('getaccountaddress', [acc], display)
+
+def getaddressesbyaccount(acc, display=False):
+    return rpccommand('getaddressesbyaccount', [acc], display)
+
+def getbalance(acc='*', minconf=1, inclwatch=False, display=False):
+    return rpccommand('getbalance', [acc, int(minconf), toBool(inclwatch)], display)
+
+def getnewaddress(acc='', display=False):
+    return rpccommand('getnewaddress', [acc], display)
+
+def getrawchangeaddress(display=False):
+    return rpccommand('getrawchangeaddress', [], display)
+
+def getreceivedbyaccount(acc, minconf=1, display=False):
+    return rpccommand('getreceivedbyaccount', [acc, int(minconf)], display)
+
+def getreceivedbyaddress(addr, minconf=1, display=False):
+    return rpccommand('getreceivedbyaddress', [addr, int(minconf)], display)
+
+def gettransaction(txid, inclwatch=False, display=False):
+    return rpccommand('gettransaction', [txid, toBool(inclwatch)], display)
+
+def getunconfirmedbalance(display=False):
+    return rpccommand('getunconfirmedbalance', [], display)
+
+def getwalletinfo(display=False):
+    return rpccommand('getwalletinfo', [], display)
+
+def importaddress(addr, label='', rescan=True, p2sh=False, display=False):
+    return rpccommand('importaddress', [addr, label, toBool(rescan), toBool(p2sh)], display)
+
+def importprivkey(privkey, label='', rescan=True, display=False):
+    return rpccommand('importprivkey', [privkey, label, toBool(rescan)], display)
+
+def importpubkey(pubkey, label='', rescan=True, display=False):
+    return rpccommand('importpubkey', [pubkey, label, toBool(rescan)], display)
+
+def importwallet(filen, display=False):
+    return rpccommand('importwallet', [filen], display)
+
+def keypoolrefill(size=100, display=False):
+    return rpccommand('keypoolrefill', [int(size)], display)
+
+def listaccounts(minconf=1, inclwatch=False, display=False):
+    return rpccommand('listaccounts', [int(minconf), toBool(inclwatch)], display)
+
+def listaddressgroupings(display=False):
+    return rpccommand('listaddressgroupings', [], display)
+
+def listlockunspent(display=False):
+    return rpccommand('listlockunspent', [], display)
+
+def listreceivedbyaccount(minconf=1, inclempty=False, inclwatch=False, display=False):
+    return rpccommand('listreceivedbyaccount', [int(minconf), toBool(inclempty), toBool(inclwatch)], display)
+
+def listreceivedbyaddress(minconf=1, inclempty=False, inclwatch=False, display=False):
+    return rpccommand('listreceivedbyaddress', [int(minconf), toBool(inclempty), toBool(inclwatch)], display)
+
+def listsinceblock(blkhash=None, minconf=1, inclwatch=False, display=False):
+    if blkhash:
+        return rpccommand('listsinceblock', [blkhash, int(minconf), toBool(inclwatch)], display)
+    else:
+        return rpccommand('listsinceblock', [], display)
+
+def listtransactions(acc='*', count=10, skip=0, inclwatch=False, display=False):
+    return rpccommand('listtransactions', [acc, int(count), int(skip), toBool(inclwatch)], display)
+
+def listunspent(minconf=1, maxconf=999999999, addrs=None, display=False):
+    if addrs:
+        return rpccommand('listunspent', [int(minconf), int(maxconf), json.loads(addrs)], display)
+    else:
+        return rpccommand('listunspent', [int(minconf), int(maxconf)], display)
+
+def lockunspent(unlock, txns, display=False):
+    return rpccommand('lockunspent', [toBool(unlock), json.loads(txns)], display)
+
+def move(fromacc, toacc, amnt, minconf=1, comment='', display=False):
+    return rpccommand('move', [fromacc, toacc, float(amnt), int(minconf), comment], display)
+
+def sendfrom(acc, addr, amnt, minconf=1, comment='', commentto='', display=False):
+    return rpccommand('sendfrom', [acc, addr, float(amnt), int(minconf), comment, commentto], display)
+
+def sendmany(acc, amnts, minconf=1, comment='', commenttos=None, display=False):
+    if commenttos:
+        return rpccommand('sendmany', [acc, json.loads(amnts), int(minconf), comment, json.loads(commenttos)], display)
+    else:
+        return rpccommand('sendmany', [acc, json.loads(amnts), int(minconf), comment], display)
+
+def sendtoaddress(addr, amnt, comment='', commentto='', subfeefromamnt=False, display=False):
+    return rpccommand('sendtoaddress', [addr, float(amnt), comment, commentto, toBool(subfeefromamnt)], display)
+
+def setaccount(addr, acc, display=False):
+    return rpccommand('setaccount', [addr, acc], display)
+
+def settxfee(amnt, display=False):
+    return rpccommand('settxfee', [float(amnt)], display)
+
+def signmessage(addr, msg, display=False):
+    return rpccommand('signmessage', [addr, msg], display)
+
+def verifymessage(addr, sig, msg, display=False):
+    return rpccommand('verifymessage', [addr, sig, msg], display)
+
 def rpchelp(func=None, display=False):
     if func:
         result = rpccommand('help', [func], display)
@@ -317,6 +467,56 @@ rpc_commands = {
     'getnetworkinfo':[[0], getnetworkinfo],
     'listbanned':[[0], listbanned],
     'setban':[[2, 3, 4], setban],
+    'signrawtransaction':[[1, 2, 3, 4], signrawtransaction],
+    'decoderawtransaction':[[1], decoderawtransaction],
+    'decodescript':[[1], decodescript],
+    'fundrawtransaction':[[2], fundrawtransaction],
+    'sendrawtransaction':[[1, 2], sendrawtransaction],
+    'createmultisig':[[2], createmultisig],
+    'estimatefee':[[1], estimatefee],
+    'estimatepriority':[[1], estimatepriority],
+    'estimatesmartfee':[[1], estimatesmartfee],
+    'estimatesmartpriority':[[1], estimatesmartpriority],
+    'validateaddress':[[1], validateaddress],
+    'verifymessage':[[3], verifymessage],
+    'abandontransaction':[[1], abandontransaction],
+    'addmultisigaddress':[[2, 3], addmultisigaddress],
+    'backupwallet':[[1], backupwallet],
+    'dumpprivkey':[[1], dumpprivkey],
+    'dumpwallet':[[1], dumpwallet],
+    'encryptwallet':[[1], encryptwallet],
+    'getaccount':[[1], getaccount],
+    'getaccountaddress':[[1], getaccountaddress],
+    'getaddressesbyaccount':[[1], getaddressesbyaccount],
+    'getbalance':[[0, 1, 2, 3], getbalance],
+    'getnewaddress':[[0, 1], getnewaddress],
+    'getrawchangeaddress':[[0], getrawchangeaddress],
+    'getreceivedbyaccount':[[1, 2], getreceivedbyaccount],
+    'getreceivedbyaddress':[[1, 2], getreceivedbyaddress],
+    'gettransaction':[[1, 2], gettransaction],
+    'getunconfirmedbalance':[[0], getunconfirmedbalance],
+    'getwalletinfo':[[0], getwalletinfo],
+    'importaddress':[[1, 2, 3, 4], importaddress],
+    'importprivkey':[[1, 2, 3], importprivkey],
+    'importpubkey':[[1, 2, 3], importpubkey],
+    'importwallet':[[1], importwallet],
+    'keypoolrefill':[[0, 1], keypoolrefill],
+    'listaccounts':[[0, 1, 2], listaccounts],
+    'listaddressgroupings':[[0], listaddressgroupings],
+    'listlockunspent':[[0], listlockunspent],
+    'listreceivedbyaccount':[[0, 1, 2, 3], listreceivedbyaccount],
+    'listreceivedbyaddress':[[0, 1, 2, 3], listreceivedbyaddress],
+    'listsinceblock':[[0, 1, 2, 3], listsinceblock],
+    'listtransactions':[[0, 1, 2, 3, 4], listtransactions],
+    'listunspent':[[0, 1, 2, 3], listunspent],
+    'lockunspent':[[2], lockunspent],
+    'move':[[3, 4, 5], move],
+    'sendfrom':[[3, 4, 5, 6], sendfrom],
+    'sendmany':[[2, 3, 4, 5], sendmany],
+    'sendtoaddress':[[2, 3, 4, 5], sendtoaddress],
+    'setaccount':[[2], setaccount],
+    'settxfee':[[1], settxfee],
+    'signmessage':[[2], signmessage],
     'help':[[0, 1], rpchelp]
 }
 
