@@ -24,6 +24,8 @@ def bitcoindIsSafe():
                     expected_uid = uids.real
                 return uids.real == expected_uid
 
+    return True
+
 ## Needed for catching RPC errors properly
 class RPCError(Exception):
     pass
