@@ -523,4 +523,3 @@ rpc_commands = {
 ## ["command", [no. of args (-1, no limit)], function, optional helptext]
 # FIXME Deprecate "commands"
 config.commands.update(rpc_commands)
-
