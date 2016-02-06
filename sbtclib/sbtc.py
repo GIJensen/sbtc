@@ -14,6 +14,13 @@ from .srpc import *
 try: range = xrange
 except NameError: pass
 
+## For Python2.x compatibility.
+def exec2(cmd):
+    try:
+        exec(cmd)
+    except:
+        exec cmd
+
 ## Get input (non-blocking)
 def getInput():
     if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
@@ -54,7 +61,7 @@ sbtc_commands = {
     'exthelp':[[0], getExtHelp],
     'rpchelp':[[0], getRPCHelp],
     'eval':[[1], lambda expr, display=True:displayResult(eval(expr)) if display else eval(expr)],
-    'exec':[[1], lambda expr, display=False:exec(expr)],
+    'exec':[[1], lambda expr, display=False:exec2(expr)],
     'copyright':[[0], lambda display=True:print('Copyright (c) 2016, gijensen')]
 }
 
