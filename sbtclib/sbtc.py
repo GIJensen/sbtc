@@ -16,10 +16,7 @@ except NameError: pass
 
 ## For Python2.x compatibility.
 def exec2(cmd):
-    try:
-        exec(cmd)
-    except:
-        exec cmd
+    exec(cmd)
 
 ## Get input (non-blocking)
 def getInput():
