@@ -55,7 +55,8 @@ sbtc_commands = {
     'exthelp':[[0], getExtHelp],
     'rpchelp':[[0], getRPCHelp],
     'eval':[[1], lambda expr, display=True:displayResult(eval(expr)) if display else eval(expr)],
-    'exec':[[1], lambda expr, display=False:exec(expr)]
+    'exec':[[1], lambda expr, display=False:exec(expr)],
+    'copyright':[[0], lambda display=True:print('Copyright (c) 2016, gijensen')]
 }
 
 ext_commands = {
