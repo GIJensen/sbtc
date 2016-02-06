@@ -23,7 +23,8 @@ def main():
     if args == 0:
         prompt()
     else:
-        processCmd(argv)
+        if not processCmd(argv):
+            print('Unknown command: ' + argv[0])
 
 if __name__ == "__main__":
     main()
