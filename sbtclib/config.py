@@ -3,7 +3,7 @@
 #
 import os
 
-VERSION = 'sbtc v0.2.00'
+VERSION = 'sbtc v0.2.99'
 CREDITS = 'gijensen'
 
 DATADIR = os.environ['HOME']+'/.bitcoin'

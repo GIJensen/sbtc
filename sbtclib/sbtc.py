@@ -36,7 +36,7 @@ def printverificationprogress(progress):
 
 def watchverificationprogress(display=True):
     progress = 0
-    while progress < 100 and not getInput():
+    while progress < 100 and getInput() == None:
         result = rpccommand('getblockchaininfo')
         progress = round(float(result['verificationprogress']) * 100, 2)
         printverificationprogress(progress)

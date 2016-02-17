@@ -4,7 +4,7 @@ from distutils.core import setup
 
 setup(
     name = 'sbtc',
-    version = '0.2.00',
+    version = '0.2.99',
     author = 'gijensen',
     author_email = 'gijensen@tutanota.com',
     url = 'https://github.com/gijensen/sbtc',
