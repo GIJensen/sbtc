@@ -131,15 +131,80 @@ def joinQuotes(cmd):
         print('Warning: Failed to locate end of quote.')
         return cmd
 
+# Copied from: stackoverflow.com/questions/510357/python-read-a-single-character-from-the-user
+def _find_getch():
+    try:
+        import termios
+    except ImportError:
+        # Non-POSIX. Return msvcrt's (Windows') getch.
+        import msvcrt
+        return msvcrt.getch
+
+    # POSIX system. Create and return a getch that manipulates the tty.
+    import sys, tty
+    def _getch():
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+        return ch
+
+    return _getch
+
+getch = _find_getch()
+
+def getInput(prefix=''):
+    char = ''
+    result = ''
+    i = 0
+
+    sys.stdout.write(prefix)
+
+    while True:
+        sys.stdout.flush()
+        char = getch()
+
+        if char == '\r':
+            sys.stdout.write('\r\n')
+            return str(result)
+        elif char == '\x1b':
+            getch() # Always "["
+            arrow = getch() # A up, B down, C right, D left
+            if arrow == 'C':
+                if i != len(result):
+                    sys.stdout.write(result[i])
+                    i += 1
+            elif arrow == 'D':
+                if i > 0:
+                    sys.stdout.write('\b')
+                    i -= 1
+        elif char == '\x7f': # backspace
+            if i > 0:
+                end = result[i:]
+                result = result[:i-1] + end
+                end += ' '
+                sys.stdout.write('\b%s%s' % (end, '\b'*len(end)))
+                i -= 1
+        elif char == '\x03': # ctrl+c
+            exit(1)
+        elif i == len(result):
+            sys.stdout.write(char)
+            result += char
+            i += 1
+        else:
+            end = char+result[i:]
+            sys.stdout.write(end+'\b'*(len(end)-1))
+            result = result[:i]+end
+            i += 1
+
 def prompt():
     global input
     cmdHelp = generateCmdHelp(sbtc_commands)
     cmd = ''
 
-    # For Python 2.x compatibility.
-    try: input = raw_input
-    except NameError: pass
-    
     print('%s by %s' % (config.VERSION, config.CREDITS))
 
     while cmd != 'exit':
@@ -158,4 +223,4 @@ def prompt():
         else:
             print(cmdHelp)
 
-        cmd = input('> ')
+        cmd = getInput('> ')
