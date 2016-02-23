@@ -156,7 +156,7 @@ def _find_getch():
 
 getch = _find_getch()
 
-def getInput(prefix=''):
+def handleInput(prefix=''):
     char = ''
     result = ''
     i = 0
@@ -223,4 +223,4 @@ def prompt():
         else:
             print(cmdHelp)
 
-        cmd = getInput('> ')
+        cmd = handleInput('> ')
