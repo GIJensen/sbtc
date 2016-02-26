@@ -216,7 +216,7 @@ def handleInput(prefix=''):
                 same = ''
                 for ii in enumerate(hits[0][i:], i):
                     for iii in hits:
-                        if iii[ii[0]] != ii[1]:
+                        if ii[0] == len(iii) or iii[ii[0]] != ii[1]:
                             result += same
                             i += len(same)
                             sys.stdout.write(same)
