@@ -7,6 +7,7 @@ from . import config
 from .srpc import *
 
 # TODO gettxfeepaid function
+# TODO exec from file function
 # TODO prompt command history, arrow key support
 # TODO Plugin support, .so, and .py files
 
@@ -57,8 +58,8 @@ sbtc_commands = {
     'loadconfig':[[0, 1], config.loadconfig],
     'exthelp':[[0], getExtHelp],
     'rpchelp':[[0], getRPCHelp],
-    'eval':[[1], lambda expr, display=True:displayResult(eval(expr)) if display else eval(expr)],
-    'exec':[[1], lambda expr, display=False:exec2(expr)],
+    'eval':[[-1], lambda expr, display=True:displayResult(eval(' '.join(expr))) if display else eval(' '.join(expr))],
+    'exec':[[-1], lambda expr, display=False:exec2(' '.join(expr))],
     'copyright':[[0], lambda display=True:print('Copyright (c) 2016, gijensen')]
 }
 
@@ -200,6 +201,7 @@ def handleInput(prefix=''):
             result = result[:i]+end
             i += 1
 
+#TODO Allow multi-line commands in prompt (for exec)
 def prompt():
     global input
     cmdHelp = generateCmdHelp(sbtc_commands)
@@ -208,10 +210,9 @@ def prompt():
     print('%s by %s' % (config.VERSION, config.CREDITS))
 
     while cmd != 'exit':
-        cmd = joinQuotes(cmd.split())
-
         # FIXME Handle Exceptions properly (Catch TypeError at least)
         if len(cmd) > 0:
+            cmd = joinQuotes(cmd.split(' '))
             try:
                 if not processCmd(cmd):
                     print(cmdHelp)
