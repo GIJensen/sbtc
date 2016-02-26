@@ -191,6 +191,41 @@ def handleInput(prefix=''):
                 i -= 1
         elif char == '\x03': # ctrl+c
             exit(1)
+        elif char == '\t':
+            if len(result.strip()) == 0 or i != len(result): continue
+            cmd = result.split()[0]
+            if len(cmd) != len(result): continue # continue if tabbing a param
+
+            hits = []
+            for ii in config.commands:
+                if len(cmd) <= len(ii) and ii[:len(cmd)] == cmd:
+                    if len(hits) == 1:
+                        print()
+                        print(hits[0])
+                        print(ii)
+                    elif len(hits) > 1:
+                        print(ii)
+                    hits.append(ii)
+            if len(hits) == 1:
+                result = hits[0] + ' '
+                i = len(result)
+                sys.stdout.write(result[len(cmd):])
+            elif len(hits) > 1:
+                print()
+                sys.stdout.write(prefix+result)
+                same = ''
+                for ii in enumerate(hits[0][i:], i):
+                    for iii in hits:
+                        if iii[ii[0]] != ii[1]:
+                            result += same
+                            i += len(same)
+                            sys.stdout.write(same)
+                            same = None
+                            break
+                    if same == None:
+                        break
+                    else:
+                        same += ii[1]
         elif i == len(result):
             sys.stdout.write(char)
             result += char
@@ -224,4 +259,4 @@ def prompt():
         else:
             print(cmdHelp)
 
-        cmd = handleInput('> ')
+        cmd = handleInput('> ').strip()
